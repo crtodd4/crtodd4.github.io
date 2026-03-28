@@ -173,22 +173,73 @@ window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.
     });
 
   } else {
-    // ── Mobile: scroll-based crossfade
-    // On mobile, use opacity crossfade instead of mask
-    hover.style.webkitMaskImage = 'none';
-    hover.style.maskImage = 'none';
-    hover.style.opacity = '0';
-    hover.style.transition = 'none';
+    // ── Mobile: swirl reveal animation + scroll toggle
 
-    function onScroll() {
-      const section = document.getElementById('aboutSection');
-      if (!section) return;
-      const rect = section.getBoundingClientRect();
-      const sectionH = section.offsetHeight;
-      const progress = Math.min(1, Math.max(0, -rect.top / (sectionH * 0.55)));
-      hover.style.opacity  = progress.toFixed(3);
-      base.style.opacity   = (1 - progress).toFixed(3);
+    // mask applied to wrapper div; img itself stays fully visible
+    if (document.getElementById('photoHoverWrap')) {
+      document.getElementById('photoHoverWrap').style.opacity = '1';
     }
+
+    let sweepAngle = 0;
+    let rafId = null;
+    let revealed = false;
+    let hasPlayed = false;
+
+    var hoverWrapM = document.getElementById('photoHoverWrap');
+    function setSwirl(deg) {
+      const clamped = Math.max(0, Math.min(360, deg));
+      const mask = 'conic-gradient(from -90deg, black 0deg ' + clamped + 'deg, transparent ' + clamped + 'deg 360deg)';
+      if (hoverWrapM) { hoverWrapM.style.webkitMaskImage = mask; hoverWrapM.style.maskImage = mask; }
+    }
+
+    function animateSwirl(targetDeg, speed, onDone) {
+      if (rafId) cancelAnimationFrame(rafId);
+      function step() {
+        const diff = targetDeg - sweepAngle;
+        if (Math.abs(diff) < 0.5) {
+          sweepAngle = targetDeg;
+          setSwirl(sweepAngle);
+          if (onDone) onDone();
+          return;
+        }
+        sweepAngle += diff * speed;
+        setSwirl(sweepAngle);
+        rafId = requestAnimationFrame(step);
+      }
+      rafId = requestAnimationFrame(step);
+    }
+
+    setSwirl(0);
+
+    // Auto-play hint after 1.2s: swirl in partway then back out
+    setTimeout(function() {
+      if (hasPlayed) return;
+      hasPlayed = true;
+      animateSwirl(252, 0.06, function() {
+        setTimeout(function() {
+          animateSwirl(0, 0.05, null);
+        }, 600);
+      });
+    }, 1200);
+
+    // Scroll: down = reveal, up = hide
+    let lastScrollY = window.scrollY;
+    window.addEventListener('scroll', function() {
+      var section = document.getElementById('aboutSection');
+      if (!section) return;
+      var rect = section.getBoundingClientRect();
+      if (rect.bottom <= 0 || rect.top >= window.innerHeight) return;
+      var scrollingDown = window.scrollY > lastScrollY;
+      lastScrollY = window.scrollY;
+      if (scrollingDown && !revealed) {
+        revealed = true;
+        animateSwirl(360, 0.07, null);
+      } else if (!scrollingDown && revealed) {
+        revealed = false;
+        animateSwirl(0, 0.07, null);
+      }
+    }, { passive: true });
+  }
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
   }
