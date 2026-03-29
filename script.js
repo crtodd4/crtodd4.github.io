@@ -36,25 +36,43 @@ let lbProjects = [];
 // ── Page switch
 function showPage(name) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  const key = name.charAt(0).toUpperCase() + name.slice(1);
-  const page = document.getElementById('page' + key);
+  var key  = name.charAt(0).toUpperCase() + name.slice(1);
+  var page = document.getElementById('page' + key);
   if (page) page.classList.add('active');
-  document.querySelectorAll('.nav-links button').forEach(b => b.classList.remove('active'));
-  const navBtn = document.getElementById('nav' + key);
+  document.querySelectorAll('.nav-links button').forEach(function(b) { b.classList.remove('active'); });
+  var navBtn = document.getElementById('nav' + key);
   if (navBtn) navBtn.classList.add('active');
   window.scrollTo(0, 0);
+  // Update URL hash so the page is shareable / bookmarkable
+  history.replaceState(null, '', '#' + name);
   if (name === 'gallery') { setTimeout(renderGallery, 20); }
-  // Re-trigger contact page animations by cloning animated elements
   if (name === 'contact') {
-    ['.contact-eyebrow','.contact-headline','.contact-sub','.contact-links'].forEach(sel => {
-      const el = document.querySelector(sel);
+    ['.contact-eyebrow','.contact-headline','.contact-sub','.contact-links'].forEach(function(sel) {
+      var el = document.querySelector(sel);
       if (!el) return;
       el.style.animation = 'none';
-      el.offsetHeight; // reflow
+      el.offsetHeight;
       el.style.animation = '';
     });
   }
 }
+
+// Read hash on load to restore correct page
+(function() {
+  var hash = window.location.hash.replace('#', '').toLowerCase();
+  var valid = { about: 1, gallery: 1, contact: 1 };
+  if (hash && valid[hash]) {
+    showPage(hash);
+  }
+})();
+
+// Handle browser back/forward
+window.addEventListener('hashchange', function() {
+  var hash = window.location.hash.replace('#', '').toLowerCase();
+  var valid = { about: 1, gallery: 1, contact: 1 };
+  if (hash && valid[hash]) showPage(hash);
+  else showPage('about');
+});
 
 // ── Gallery
 function renderGallery(filter) {
@@ -136,111 +154,96 @@ document.addEventListener('mousemove', e => {
 const nav = document.getElementById('mainNav');
 window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 50));
 
-// ── Photo reveal — spotlight on desktop, scroll-fade on mobile
+// ── Photo reveal
 (function() {
-  const swap    = document.getElementById('photoSwap');
-  const hover   = document.getElementById('photoHover');
-  const base    = document.getElementById('photoBase');
-  if (!swap || !hover || !base) return;
+  var swap     = document.getElementById('photoSwap');
+  var wrap     = document.getElementById('photoHoverWrap');
+  var base     = document.getElementById('photoBase');
+  if (!swap || !wrap || !base) return;
 
-  const RADIUS = 110; // spotlight radius in px
+  var RADIUS   = 140;
+  var isTouch  = !window.matchMedia('(hover: hover)').matches;
 
-  // ── Desktop: spotlight mask follows cursor
-  const isHoverDevice = window.matchMedia('(hover: hover)').matches;
-  if (isHoverDevice) {
-    const hoverWrap = document.getElementById('photoHoverWrap');
-    function setMask(x, y, r) {
-      const v = `radial-gradient(circle ${r}px at ${x}px ${y}px, black 55%, transparent 100%)`;
-      if (hoverWrap) { hoverWrap.style.webkitMaskImage = v; hoverWrap.style.maskImage = v; }
+  // Reset any CSS-set mask so JS owns it fully
+  wrap.style.webkitMaskImage = '';
+  wrap.style.maskImage = '';
+
+  if (!isTouch) {
+    // ── DESKTOP: radial spotlight follows cursor ──
+    function setRadial(x, y, r) {
+      var v = 'radial-gradient(circle ' + r + 'px at ' + x + 'px ' + y + 'px, black 40%, transparent 100%)';
+      wrap.style.webkitMaskImage = v;
+      wrap.style.maskImage = v;
     }
-    // Start with no reveal
-    setMask(0, 0, 0);
+    // Start hidden
+    setRadial(0, 0, 0);
 
-    swap.addEventListener('mouseenter', () => {
-      if (hoverWrap) { hoverWrap.style.transition = '-webkit-mask-image 0.25s ease, mask-image 0.25s ease'; }
+    swap.addEventListener('mouseenter', function() {
+      wrap.style.transition = '-webkit-mask-image 0.3s ease, mask-image 0.3s ease';
     });
-    swap.addEventListener('mousemove', e => {
-      const rect = swap.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      setMask(x, y, RADIUS);
+    swap.addEventListener('mousemove', function(e) {
+      wrap.style.transition = 'none';
+      var rect = swap.getBoundingClientRect();
+      setRadial(e.clientX - rect.left, e.clientY - rect.top, RADIUS);
     });
-    swap.addEventListener('mouseleave', () => {
-      if (hoverWrap) { hoverWrap.style.transition = '-webkit-mask-image 0.4s ease, mask-image 0.4s ease'; }
-      // Collapse back to 0
-      const v = `radial-gradient(circle 0px at 50% 50%, black 55%, transparent 100%)`;
-      if (hoverWrap) { hoverWrap.style.webkitMaskImage = v; hoverWrap.style.maskImage = v; }
+    swap.addEventListener('mouseleave', function() {
+      wrap.style.transition = '-webkit-mask-image 0.45s ease, mask-image 0.45s ease';
+      setRadial(0, 0, 0);
     });
 
   } else {
-    // ── Mobile: swirl reveal animation + scroll toggle
+    // ── MOBILE: conic swirl reveal ──
+    var sweepAngle = 0;
+    var rafId      = null;
+    var revealed   = false;
+    var hasPlayed  = false;
 
-    // mask applied to wrapper div; img itself stays fully visible
-    if (document.getElementById('photoHoverWrap')) {
-      document.getElementById('photoHoverWrap').style.opacity = '1';
-    }
-
-    let sweepAngle = 0;
-    let rafId = null;
-    let revealed = false;
-    let hasPlayed = false;
-
-    var hoverWrapM = document.getElementById('photoHoverWrap');
     function setSwirl(deg) {
-      const clamped = Math.max(0, Math.min(360, deg));
-      const mask = 'conic-gradient(from -90deg, black 0deg ' + clamped + 'deg, transparent ' + clamped + 'deg 360deg)';
-      if (hoverWrapM) { hoverWrapM.style.webkitMaskImage = mask; hoverWrapM.style.maskImage = mask; }
+      var clamped = Math.max(0, Math.min(360, deg));
+      var v = 'conic-gradient(from -90deg, black 0deg ' + clamped + 'deg, transparent ' + clamped + 'deg 360deg)';
+      wrap.style.webkitMaskImage = v;
+      wrap.style.maskImage = v;
     }
 
-    function animateSwirl(targetDeg, speed, onDone) {
+    function animateTo(target, speed, done) {
       if (rafId) cancelAnimationFrame(rafId);
-      function step() {
-        const diff = targetDeg - sweepAngle;
+      (function step() {
+        var diff = target - sweepAngle;
         if (Math.abs(diff) < 0.5) {
-          sweepAngle = targetDeg;
+          sweepAngle = target;
           setSwirl(sweepAngle);
-          if (onDone) onDone();
+          if (done) done();
           return;
         }
         sweepAngle += diff * speed;
         setSwirl(sweepAngle);
         rafId = requestAnimationFrame(step);
-      }
-      rafId = requestAnimationFrame(step);
+      })();
     }
 
+    // Start fully hidden
     setSwirl(0);
 
-    // Auto-play hint after 1.2s: swirl in partway then back out
+    // Auto-play hint: swirl in ~70%, pause, swirl back out
     setTimeout(function() {
       if (hasPlayed) return;
       hasPlayed = true;
-      animateSwirl(252, 0.06, function() {
-        setTimeout(function() {
-          animateSwirl(0, 0.05, null);
-        }, 600);
+      animateTo(260, 0.07, function() {
+        setTimeout(function() { animateTo(0, 0.06, null); }, 700);
       });
-    }, 1200);
+    }, 1000);
 
     // Scroll: down = reveal, up = hide
-    let lastScrollY = window.scrollY;
+    var lastY = window.scrollY;
     window.addEventListener('scroll', function() {
       var section = document.getElementById('aboutSection');
       if (!section) return;
       var rect = section.getBoundingClientRect();
       if (rect.bottom <= 0 || rect.top >= window.innerHeight) return;
-      var scrollingDown = window.scrollY > lastScrollY;
-      lastScrollY = window.scrollY;
-      if (scrollingDown && !revealed) {
-        revealed = true;
-        animateSwirl(360, 0.07, null);
-      } else if (!scrollingDown && revealed) {
-        revealed = false;
-        animateSwirl(0, 0.07, null);
-      }
+      var goingDown = window.scrollY > lastY;
+      lastY = window.scrollY;
+      if (goingDown && !revealed) { revealed = true;  animateTo(360, 0.08, null); }
+      else if (!goingDown && revealed) { revealed = false; animateTo(0, 0.08, null); }
     }, { passive: true });
-  }
-    window.addEventListener('scroll', onScroll, { passive: true });
-    onScroll();
   }
 })();
