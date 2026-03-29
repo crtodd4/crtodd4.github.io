@@ -15,18 +15,18 @@ const THUMBS = {
 };
 
 const PROJECTS = [
-  { id:"game-night",  title:"Game Night Graphics",      tag:"Sports Design",   date:"January 2025"   },
-  { id:"draft-day",   title:"Draft Day Player Cards",   tag:"Sports Design",   date:"March 2025"     },
-  { id:"champ-merch", title:"Championship Merch",       tag:"Sports Design",   date:"June 2025"      },
-  { id:"athlete-hl",  title:"Athlete Highlights",       tag:"Sports Design",   date:"August 2025"    },
-  { id:"mvp-card",    title:"MVP Season Cards",          tag:"Sports Design",   date:"October 2024"   },
-  { id:"jersey-drop", title:"Jersey Drop Campaign",     tag:"Sports Design",   date:"December 2024"  },
-  { id:"q4-campaign", title:"Q4 Brand Awareness",       tag:"Social Campaign", date:"November 2024"  },
+  { id:"game-night",  title:"Game Night Graphics",      tag:"Disc Golf",   date:"January 2025"   },
+  { id:"draft-day",   title:"Draft Day Player Cards",   tag:"Disc Golf",   date:"March 2025"     },
+  { id:"champ-merch", title:"Championship Merch",       tag:"Disc Golf",   date:"June 2025"      },
+  { id:"athlete-hl",  title:"Athlete Highlights",       tag:"Disc Golf",   date:"August 2025"    },
+  { id:"mvp-card",    title:"MVP Season Cards",          tag:"Disc Golf",   date:"October 2024"   },
+  { id:"jersey-drop", title:"Jersey Drop Campaign",     tag:"Disc Golf",   date:"December 2024"  },
+  { id:"q4-campaign", title:"Q4 Brand Awareness",       tag:"College Athletics", date:"November 2024"  },
   { id:"launch-day",  title:"Product Launch Series",    tag:"Corporate",       date:"February 2025"  },
   { id:"rebrand",     title:"Full Rebrand — Tech Firm", tag:"Corporate",       date:"April 2025"     },
-  { id:"ig-system",   title:"Instagram Content System", tag:"Social Campaign", date:"July 2025"      },
+  { id:"ig-system",   title:"Instagram Content System", tag:"College Athletics", date:"July 2025"      },
   { id:"brand-story", title:"Brand Story Campaign",     tag:"Corporate",       date:"September 2025" },
-  { id:"social-pack", title:"Social Media Pack",        tag:"Social Campaign", date:"December 2025"  },
+  { id:"social-pack", title:"Social Media Pack",        tag:"College Athletics", date:"December 2025"  },
 ];
 
 let currentFilter = 'all';
