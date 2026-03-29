@@ -237,9 +237,8 @@ nav.scrolled { padding: 0.8rem 4rem; }
   position: absolute;
   inset: 0;
   z-index: 2;
-  -webkit-mask-image: radial-gradient(circle 0px at 50% 50%, black 55%, transparent 100%);
-  mask-image: radial-gradient(circle 0px at 50% 50%, black 55%, transparent 100%);
   overflow: hidden;
+  /* mask owned entirely by JS - no CSS mask here */
 }
 .photo-hover {
   width: 100%;
@@ -585,3 +584,26 @@ nav.scrolled { padding: 0.8rem 4rem; }
   .contact-card-handle { font-size: 0.85rem; }
 }
 
+
+/* ── LOGO WORDMARK PLACEHOLDER ── */
+.logo-wordmark {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 900;
+  font-size: 1.4rem;
+  letter-spacing: -0.02em;
+  color: var(--white);
+  cursor: pointer;
+  transition: opacity 0.2s;
+  user-select: none;
+}
+.logo-wordmark:hover { opacity: 0.75; }
+.logo-wordmark--footer {
+  font-size: 1.1rem;
+  opacity: 0.65;
+}
+.logo-wordmark--hero {
+  font-size: 4rem;
+  color: var(--blue-bright);
+  letter-spacing: -0.03em;
+  position: relative; z-index: 2;
+}
