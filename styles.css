@@ -337,7 +337,7 @@ nav.scrolled { padding: 0.8rem 4rem; }
 .thumb-card.visible { transform: translateY(0); opacity: 1; }
 .thumb-card:hover {
   box-shadow: 0 8px 40px rgba(55,138,221,0.2), 0 2px 12px rgba(0,0,0,0.5);
-  transform: translateY(-4px);
+  transform: translateY(0px);
 }
 .thumb-card:hover .thumb-overlay { opacity: 1; }
 .thumb-card:hover .thumb-label { transform: translateY(0); opacity: 1; }
