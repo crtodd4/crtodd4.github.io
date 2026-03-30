@@ -199,58 +199,32 @@ window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.
     });
 
   } else {
-    // ── MOBILE: conic swirl reveal ──
-    var sweepAngle = 0;
-    var rafId      = null;
-    var revealed   = false;
-    var hasPlayed  = false;
+    // ── MOBILE: slow opacity crossfade tied directly to scroll position ──
+    // The hover image fades in as you scroll down past the photo,
+    // and fades back out as you scroll back up. No swirl, no direction logic —
+    // opacity mirrors scroll position so it always feels in sync.
 
-    function setSwirl(deg) {
-      var clamped = Math.max(0, Math.min(360, deg));
-      var v = 'conic-gradient(from -90deg, black 0deg ' + clamped + 'deg, transparent ' + clamped + 'deg 360deg)';
-      wrap.style.webkitMaskImage = v;
-      wrap.style.maskImage = v;
-    }
+    // Use CSS transition on the wrap's opacity instead of mask
+    // so it works on all mobile browsers including Safari
+    wrap.style.webkitMaskImage = 'none';
+    wrap.style.maskImage = 'none';
+    wrap.style.opacity = '0';
+    wrap.style.transition = 'opacity 1.2s ease';
+    base.style.transition = 'opacity 1.2s ease';
 
-    function animateTo(target, speed, done) {
-      if (rafId) cancelAnimationFrame(rafId);
-      (function step() {
-        var diff = target - sweepAngle;
-        if (Math.abs(diff) < 0.5) {
-          sweepAngle = target;
-          setSwirl(sweepAngle);
-          if (done) done();
-          return;
-        }
-        sweepAngle += diff * speed;
-        setSwirl(sweepAngle);
-        rafId = requestAnimationFrame(step);
-      })();
-    }
-
-    // Start fully hidden
-    setSwirl(0);
-
-    // Auto-play hint: swirl in ~70%, pause, swirl back out
-    setTimeout(function() {
-      if (hasPlayed) return;
-      hasPlayed = true;
-      animateTo(260, 0.07, function() {
-        setTimeout(function() { animateTo(0, 0.06, null); }, 700);
-      });
-    }, 1000);
-
-    // Scroll: down = reveal, up = hide
-    var lastY = window.scrollY;
-    window.addEventListener('scroll', function() {
+    function updateFromScroll() {
       var section = document.getElementById('aboutSection');
       if (!section) return;
-      var rect = section.getBoundingClientRect();
-      if (rect.bottom <= 0 || rect.top >= window.innerHeight) return;
-      var goingDown = window.scrollY > lastY;
-      lastY = window.scrollY;
-      if (goingDown && !revealed) { revealed = true;  animateTo(360, 0.08, null); }
-      else if (!goingDown && revealed) { revealed = false; animateTo(0, 0.08, null); }
-    }, { passive: true });
+      var rect    = section.getBoundingClientRect();
+      var winH    = window.innerHeight;
+      // progress: 0 when photo top is at bottom of screen, 1 when photo centre hits screen centre
+      var photoMid  = rect.top + rect.height * 0.4;
+      var progress  = 1 - Math.max(0, Math.min(1, photoMid / (winH * 0.7)));
+      wrap.style.opacity = progress.toFixed(3);
+      base.style.opacity = (1 - progress * 0.85).toFixed(3);
+    }
+
+    window.addEventListener('scroll', updateFromScroll, { passive: true });
+    updateFromScroll();
   }
 })();

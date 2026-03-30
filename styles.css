@@ -610,48 +610,66 @@ nav.scrolled { padding: 0.8rem 4rem; }
 
 /* ── Mobile gallery info strip ── */
 @media (hover: none) {
-  /* On touch devices, always show a slim info bar below each card */
+  /* Touch devices: card is a flex column — image on top, info strip below */
   .thumb-card {
-    aspect-ratio: unset;
-    display: flex;
-    flex-direction: column;
+    aspect-ratio: unset !important;
+    display: flex !important;
+    flex-direction: column !important;
+    height: auto !important;
   }
+  /* Wrap the image so it keeps its ratio inside the flex column */
   .thumb-img {
-    width: 100%; aspect-ratio: 4/3;
-    object-fit: cover; display: block;
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    display: block;
     flex-shrink: 0;
   }
-  .thumb-overlay {
-    /* Hide hover overlay on touch — we use the strip instead */
+  /* Hide the absolute-positioned hover overlay — irrelevant on touch */
+  .thumb-overlay,
+  .thumb-expand {
     display: none !important;
   }
-  .thumb-expand { display: none; }
+  /* Info strip — always visible, sits below the image */
   .thumb-info-strip {
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: space-between;
-    padding: 0.65rem 0.9rem;
-    background: var(--surface2);
-    border-top: 1px solid rgba(55,138,221,0.15);
+    padding: 0.7rem 1rem;
+    background: #111820;
+    border-top: 1px solid rgba(55,138,221,0.2);
     flex-shrink: 0;
   }
-  .thumb-info-strip .strip-text { flex: 1; }
+  .thumb-info-strip .strip-text { flex: 1; min-width: 0; }
   .thumb-info-strip .strip-tag {
-    font-family: 'Poppins', sans-serif; font-weight: 700;
-    font-size: 0.55rem; letter-spacing: 0.18em; text-transform: uppercase;
-    color: var(--blue-bright); margin-bottom: 0.15rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 0.58rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #378ADD;
+    margin-bottom: 0.18rem;
   }
   .thumb-info-strip .strip-title {
-    font-family: 'Poppins', sans-serif; font-weight: 700;
-    font-size: 0.82rem; color: var(--white); line-height: 1.2;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: #ffffff;
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .thumb-info-strip .strip-arrow {
-    font-size: 1rem; color: var(--blue-bright);
-    margin-left: 0.75rem; flex-shrink: 0;
-    opacity: 0.7;
+    font-size: 1.1rem;
+    color: #378ADD;
+    margin-left: 0.75rem;
+    flex-shrink: 0;
+    opacity: 0.75;
   }
 }
-/* On desktop, hide the strip */
+
+/* Desktop: hide the strip */
 @media (hover: hover) {
-  .thumb-info-strip { display: none; }
+  .thumb-info-strip { display: none !important; }
 }
