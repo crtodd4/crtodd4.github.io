@@ -93,12 +93,9 @@ function renderGallery(filter) {
         </div>
       </div>
       <div class="thumb-expand">&#x26F6;</div>
-      <div class="thumb-info-strip">
-        <div class="strip-text">
-          <p class="strip-tag">${p.tag}</p>
-          <p class="strip-title">${p.title}</p>
-        </div>
-        <span class="strip-arrow">&#8599;</span>
+      <div class="thumb-info-badge">
+        <p class="badge-tag">${p.tag}</p>
+        <p class="badge-title">${p.title}</p>
       </div>`;
     card.addEventListener('click', () => openLightbox(i));
     grid.appendChild(card);

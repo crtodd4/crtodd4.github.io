@@ -609,67 +609,61 @@ nav.scrolled { padding: 0.8rem 4rem; }
 }
 
 /* ── Mobile gallery info strip ── */
-@media (hover: none) {
-  /* Touch devices: card is a flex column — image on top, info strip below */
-  .thumb-card {
-    aspect-ratio: unset !important;
-    display: flex !important;
-    flex-direction: column !important;
-    height: auto !important;
-  }
-  /* Wrap the image so it keeps its ratio inside the flex column */
-  .thumb-img {
-    width: 100%;
-    aspect-ratio: 4/3;
-    object-fit: cover;
+/* ── Gallery info badge: always visible on tablet/mobile ── */
+
+/* Desktop: hide the badge, show hover overlay as normal */
+.thumb-info-badge { display: none; }
+
+/* Tablet and mobile (≤960px): show the badge, hide hover overlay */
+@media (max-width: 960px) {
+  /* Badge is absolutely pinned to bottom-left of the card */
+  .thumb-info-badge {
     display: block;
-    flex-shrink: 0;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 5;
+    max-width: 85%;
+    padding: 0.6rem 3.2rem 0.65rem 0.9rem;
+    background: #0d2a4e;
+    clip-path: polygon(0 0, 80% 0, 100% 100%, 0 100%);
   }
-  /* Hide the absolute-positioned hover overlay — irrelevant on touch */
-  .thumb-overlay,
-  .thumb-expand {
-    display: none !important;
-  }
-  /* Info strip — always visible, sits below the image */
-  .thumb-info-strip {
-    display: flex !important;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.7rem 1rem;
-    background: #111820;
-    border-top: 1px solid rgba(55,138,221,0.2);
-    flex-shrink: 0;
-  }
-  .thumb-info-strip .strip-text { flex: 1; min-width: 0; }
-  .thumb-info-strip .strip-tag {
+  .thumb-info-badge .badge-tag {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
-    font-size: 0.58rem;
+    font-size: 0.55rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     color: #378ADD;
-    margin-bottom: 0.18rem;
+    margin-bottom: 0.2rem;
   }
-  .thumb-info-strip .strip-title {
+  .thumb-info-badge .badge-title {
     font-family: 'Poppins', sans-serif;
     font-weight: 700;
     font-size: 0.85rem;
     color: #ffffff;
-    line-height: 1.25;
+    line-height: 1.2;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .thumb-info-strip .strip-arrow {
-    font-size: 1.1rem;
-    color: #378ADD;
-    margin-left: 0.75rem;
-    flex-shrink: 0;
-    opacity: 0.75;
-  }
+  /* Hide hover overlay on touch — badge replaces it */
+  .thumb-overlay { display: none !important; }
+  .thumb-expand  { display: none !important; }
+  /* Keep card as normal aspect-ratio block */
+  .thumb-card { aspect-ratio: 4/3; }
 }
 
-/* Desktop: hide the strip */
-@media (hover: hover) {
-  .thumb-info-strip { display: none !important; }
+/* ── SVG Logo ── */
+.logo-svg {
+  height: 32px;
+  width: auto;
+  display: block;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+.logo-svg:hover { opacity: 0.75; }
+.logo-svg--footer {
+  height: 24px;
+  opacity: 0.65;
 }
